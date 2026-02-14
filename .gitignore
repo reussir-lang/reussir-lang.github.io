@@ -7,5 +7,9 @@ doc/presentation/*.log
 doc/presentation/*.nav
 doc/presentation/*.snm
 doc/presentation/*.vrb
+doc/presentation/*.out
+doc/presentation/*.toc
+doc/presentation/*.xdv
 doc/presentation/*.mlir
+doc/presentation/*.pdf
 doc/presentation/.vscode/

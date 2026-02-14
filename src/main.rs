@@ -75,6 +75,15 @@ fn App() -> impl IntoView {
                                     <i class="fa-solid fa-code"></i>
                                     <span class="whitespace-nowrap leading-none">"Read Test Evidence"</span>
                                 </a>
+                                <a
+                                    class="btn h-auto min-h-0 gap-2 rounded-2xl border border-cyan-400/60 bg-slate-900 px-6 py-3 text-sm font-semibold text-cyan-200 hover:bg-slate-800"
+                                    href="/reussir-design-slides.pdf"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span class="whitespace-nowrap leading-none">"Design Slides (PDF)"</span>
+                                </a>
                             </div>
                         </div>
 
