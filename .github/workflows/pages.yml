@@ -21,29 +21,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-      uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Setup Pages
-      uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v5
 
       - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: wasm32-unknown-unknown
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
 
       - name: Cache cargo
-      uses: swatinem/rust-cache@v2
+        uses: swatinem/rust-cache@v2
 
       - name: Install Trunk
-      run: cargo install trunk --locked
+        run: cargo install trunk --locked
 
       - name: Build site
-      run: trunk build --release --public-url /
+        run: trunk build --release --public-url /
 
       - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: dist
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
 
   deploy:
     needs: build
