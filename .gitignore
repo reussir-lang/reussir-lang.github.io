@@ -1,5 +1,6 @@
 /target
 /dist
+/static/tailwind.css
 doc/presentation/*.aux
 doc/presentation/*.fdb_latexmk
 doc/presentation/*.fls

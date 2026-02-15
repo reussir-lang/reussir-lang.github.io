@@ -82,21 +82,21 @@ fn App() -> impl IntoView {
                             </p>
                             <div class="flex flex-wrap gap-3">
                                 <a
-                                    class="btn h-auto min-h-0 gap-2 rounded-2xl border-none bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-200 hover:bg-cyan-200 hover:shadow-lg hover:shadow-cyan-400/20"
+                                    class="inline-flex items-center justify-center cursor-pointer select-none h-auto min-h-0 gap-2 rounded-2xl border-none bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-200 hover:bg-cyan-200 hover:shadow-lg hover:shadow-cyan-400/20"
                                     href="#observatory"
                                 >
                                     <i class="fa-solid fa-diagram-project"></i>
                                     <span class="whitespace-nowrap leading-none">"See Pipeline"</span>
                                 </a>
                                 <a
-                                    class="btn h-auto min-h-0 gap-2 rounded-2xl border border-slate-500 bg-transparent px-6 py-3 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-slate-800"
+                                    class="inline-flex items-center justify-center cursor-pointer select-none h-auto min-h-0 gap-2 rounded-2xl border border-slate-500 bg-transparent px-6 py-3 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-slate-800"
                                     href="#evidence"
                                 >
                                     <i class="fa-solid fa-code"></i>
                                     <span class="whitespace-nowrap leading-none">"Read Test Evidence"</span>
                                 </a>
                                 <a
-                                    class="btn h-auto min-h-0 gap-2 rounded-2xl border border-cyan-400/60 bg-slate-900 px-6 py-3 text-sm font-semibold text-cyan-200 transition-all duration-200 hover:bg-slate-800"
+                                    class="inline-flex items-center justify-center cursor-pointer select-none h-auto min-h-0 gap-2 rounded-2xl border border-cyan-400/60 bg-slate-900 px-6 py-3 text-sm font-semibold text-cyan-200 transition-all duration-200 hover:bg-slate-800"
                                     href="/reussir-design-slides.pdf"
                                     target="_blank"
                                     rel="noreferrer"
@@ -118,21 +118,21 @@ fn App() -> impl IntoView {
                                         <span class="text-slate-300">"Frontend"</span>
                                         <span class="text-cyan-300">"Haskell"</span>
                                     </div>
-                                    <progress class="progress progress-info w-full" value="84" max="100"></progress>
+                                    <progress class="progress w-full" value="84" max="100"></progress>
                                 </div>
                                 <div>
                                     <div class="mb-1 flex items-center justify-between text-xs">
                                         <span class="text-slate-300">"Backend"</span>
                                         <span class="text-cyan-300">"MLIR + LLVM"</span>
                                     </div>
-                                    <progress class="progress progress-info w-full" value="92" max="100"></progress>
+                                    <progress class="progress w-full" value="92" max="100"></progress>
                                 </div>
                                 <div>
                                     <div class="mb-1 flex items-center justify-between text-xs">
                                         <span class="text-slate-300">"Runtime"</span>
                                         <span class="text-cyan-300">"Rust RC/Region"</span>
                                     </div>
-                                    <progress class="progress progress-info w-full" value="88" max="100"></progress>
+                                    <progress class="progress w-full" value="88" max="100"></progress>
                                 </div>
                             </div>
                             <div class="mt-5 grid grid-cols-2 gap-2 text-xs">

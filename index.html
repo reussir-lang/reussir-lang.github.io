@@ -9,24 +9,7 @@
       content="Reussir language website: RC-based memory reuse, region management, and MLIR-powered compilation."
     />
 
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/daisyui@5.5.18/daisyui.css"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              display: ["Space Grotesk", "sans-serif"],
-              sans: ["IBM Plex Sans", "sans-serif"],
-              mono: ["JetBrains Mono", "monospace"],
-            },
-          },
-        },
-      };
-    </script>
+    <link data-trunk rel="css" href="static/tailwind.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap"
@@ -121,8 +104,27 @@
         border-radius: 1px;
       }
 
-      .progress-info::-webkit-progress-value {
+      progress.progress {
+        appearance: none;
+        -webkit-appearance: none;
+        height: 0.5rem;
+        width: 100%;
+        border-radius: 9999px;
+        overflow: hidden;
+        background-color: rgb(30 41 59);
+      }
+      progress.progress::-webkit-progress-bar {
+        background-color: rgb(30 41 59);
+        border-radius: 9999px;
+      }
+      progress.progress::-webkit-progress-value {
+        background-color: rgb(34 211 238);
+        border-radius: 9999px;
         box-shadow: 0 0 8px rgba(34,211,238,0.4);
+      }
+      progress.progress::-moz-progress-bar {
+        background-color: rgb(34 211 238);
+        border-radius: 9999px;
       }
     </style>
 
