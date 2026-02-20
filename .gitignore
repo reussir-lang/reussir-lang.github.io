@@ -13,3 +13,4 @@ doc/presentation/*.xdv
 doc/presentation/*.mlir
 doc/presentation/*.pdf
 doc/presentation/.vscode/
+.astro/
