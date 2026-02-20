@@ -1,0 +1,43 @@
+---
+import { REUSSIR_REPO_URL } from "../data/constants";
+
+const phases = [
+  { id: "A", items: ["token instantiation", "inc/dec cancellation (1)", "rc decrement expansion"] },
+  { id: "B", items: ["infer variant tag", "drop expansion", "inc/dec cancellation (2)"] },
+  { id: "C", items: ["drop logic expansion", "token reuse", "scf lowering"] },
+  { id: "D", items: ["polyffi + cf lowering", "cf -> llvm", "cse / canonicalize"] },
+];
+---
+
+<section
+  id="observatory"
+  class="rounded-3xl border border-slate-700 border-l-4 border-l-cyan-400/60 bg-slate-900/70 p-7 md:p-10"
+>
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="flex items-center gap-3 font-display text-2xl text-white md:text-3xl">
+      <i class="fa-solid fa-timeline text-cyan-300"></i>
+      Compilation Observatory
+    </h2>
+    <p class="font-mono text-xs text-slate-400">
+      from{" "}
+      <a
+        class="underline decoration-cyan-400/60 underline-offset-2 transition-colors duration-200 hover:text-cyan-300"
+        href={REUSSIR_REPO_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        github.com/schrodingerzhu/reussir
+      </a>
+    </p>
+  </div>
+  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    {phases.map((p) => (
+      <div class="rounded-xl border border-slate-700 bg-slate-950 p-5 transition-all duration-300 hover:border-cyan-400/50">
+        <p class="font-mono text-xs text-cyan-300">phase {p.id}</p>
+        {p.items.map((item) => (
+          <p class="mt-1 text-sm text-slate-200">{item}</p>
+        ))}
+      </div>
+    ))}
+  </div>
+</section>

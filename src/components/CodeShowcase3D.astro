@@ -1,0 +1,120 @@
+---
+import { snippets } from "../data/snippets";
+import { REUSSIR_REPO_URL } from "../data/constants";
+
+const slotClasses = ["slot-front", "slot-left", "slot-right"];
+---
+
+<section id="evidence" class="space-y-4">
+  <div class="flex flex-wrap items-end justify-between gap-2">
+    <h2 class="flex items-center gap-3 font-display text-2xl text-white md:text-3xl">
+      <i class="fa-solid fa-flask-vial text-cyan-300"></i>
+      Ground-Truth Examples
+    </h2>
+    <p class="font-mono text-xs text-slate-400">
+      examples from{" "}
+      <a
+        class="underline decoration-cyan-400/60 underline-offset-2 transition-colors duration-200 hover:text-cyan-300"
+        href={REUSSIR_REPO_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        reussir/tests/integration
+      </a>
+    </p>
+  </div>
+  <div id="carousel-scene" class="carousel-scene">
+    <div id="carousel-rotor" class="carousel-rotor">
+      {snippets.map((s, i) => (
+        <article
+          class={`carousel-cell ${slotClasses[i]} rounded-2xl border border-slate-700 bg-slate-900/70 p-5 md:p-6`}
+          data-index={i}
+        >
+          <p class="mb-2 font-mono text-xs uppercase tracking-[0.15em] text-cyan-300">
+            {s.label}
+          </p>
+          <pre class="overflow-x-auto rounded-xl border-l-[3px] border-cyan-400/60 bg-slate-950 p-4 text-xs leading-relaxed text-slate-100"><code class="language-rust">{s.code}</code></pre>
+        </article>
+      ))}
+    </div>
+    <div id="carousel-dots" class="carousel-dots">
+      {snippets.map((_, i) => (
+        <button
+          class={`carousel-dot ${i === 0 ? "active" : ""}`}
+          data-target={i}
+          aria-label={`Show example ${i + 1}`}
+        />
+      ))}
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    var scene = document.getElementById('carousel-scene');
+    var rotor = document.getElementById('carousel-rotor');
+    var dotsContainer = document.getElementById('carousel-dots');
+    if (!scene || !rotor || !dotsContainer) return;
+
+    var cells = rotor.querySelectorAll('.carousel-cell');
+    var dots = dotsContainer.querySelectorAll('.carousel-dot');
+    var slots = ['slot-front', 'slot-left', 'slot-right'];
+    var current = 0;
+    var timer = null;
+    var hovered = false;
+
+    function goTo(index) {
+      current = index;
+      /* card i gets slot: (i - current + 3) % 3  →  0=front, 1=left, 2=right */
+      cells.forEach(function (cell, i) {
+        slots.forEach(function (s) { cell.classList.remove(s); });
+        var slot = (i - current + 3) % 3;
+        cell.classList.add(slots[slot]);
+      });
+      dots.forEach(function (d, i) {
+        d.classList.toggle('active', i === current);
+      });
+    }
+
+    function stepForward() {
+      goTo((current + 1) % 3);
+    }
+
+    function startRotation() {
+      if (!timer) timer = setInterval(function () {
+        if (!hovered) stepForward();
+      }, 3500);
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      timer = null;
+      startRotation();
+    }
+
+    /* dot clicks */
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        var target = parseInt(dot.getAttribute('data-target'), 10);
+        goTo(target);
+        resetTimer();
+      });
+    });
+
+    /* pause on hover */
+    rotor.addEventListener('mouseenter', function () { hovered = true; });
+    rotor.addEventListener('mouseleave', function () { hovered = false; });
+
+    /* start when scrolled into view */
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          scene.classList.add('in-view');
+          startRotation();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.2 });
+    observer.observe(scene);
+  })();
+</script>

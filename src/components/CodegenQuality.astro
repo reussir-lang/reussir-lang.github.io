@@ -1,0 +1,59 @@
+---
+import { REUSSIR_REPO_URL } from "../data/constants";
+---
+
+<section class="rounded-3xl border border-slate-700 bg-slate-900/70 p-7 md:p-10">
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="flex items-center gap-3 font-display text-2xl text-white md:text-3xl">
+      <i class="fa-solid fa-microchip text-cyan-300"></i>
+      Codegen Quality Story
+    </h2>
+    <p class="font-mono text-xs text-slate-400">
+      from Fibonacci and Tree Mirror case studies
+    </p>
+  </div>
+  <div class="grid gap-4 lg:grid-cols-2">
+    <article class="rounded-2xl border border-slate-700 bg-slate-950 p-5">
+      <h3 class="mb-3 font-display text-xl text-white">
+        Fibonacci (matrix exponentiation)
+      </h3>
+      <ul class="space-y-2 text-sm text-slate-300">
+        <li>- optimization shapes recursion into efficient accumulation-loop codegen</li>
+        <li>- in matmul(A, B), A can be reused when uniqueness is proven</li>
+        <li>- one remaining allocation in matmul(B, B) tracks shared ownership constraints</li>
+      </ul>
+      <p class="mt-4 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300">
+        Effect: reduced allocation churn and improved locality without breaking FP semantics.
+      </p>
+    </article>
+    <article class="rounded-2xl border border-slate-700 bg-slate-950 p-5">
+      <h3 class="mb-3 font-display text-xl text-white">
+        Tree Mirror (non-tail recursion)
+      </h3>
+      <ul class="space-y-2 text-sm text-slate-300">
+        <li>- ownership destruction is fused with traversal instead of a separate deep-free pass</li>
+        <li>- RC updates are emitted only where aliasing requires</li>
+        <li>- recursive-call barriers prevent unsafe token carry-over and heap growth</li>
+      </ul>
+      <p class="mt-4 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300">
+        Effect: practical low-level codegen while keeping functional source structure.
+      </p>
+    </article>
+  </div>
+  <div class="mt-4 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-5">
+    <h3 class="mb-3 flex items-center gap-2 font-display text-xl text-white">
+      <i class="fa-solid fa-link text-cyan-200"></i>
+      polyFFI + Multimodal Memory
+    </h3>
+    <div class="grid gap-3 md:grid-cols-2">
+      <div class="rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-300">
+        polyFFI: runtime ownership model is bridgeable to native code through explicit
+        headers/templates, enabling mixed-language systems workflows.
+      </div>
+      <div class="rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-300">
+        Multimodal memory model: [value] (inline/no RC), [shared] (immutable RC), [regional]
+        (region-scoped mutability), resolved before ownership emission.
+      </div>
+    </div>
+  </div>
+</section>

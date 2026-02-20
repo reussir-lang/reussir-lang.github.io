@@ -1,0 +1,47 @@
+---
+const cards = [
+  {
+    num: "01",
+    label: "FP foundation",
+    icon: "fa-solid fa-shuffle",
+    title: "Intro-Elim Reuse",
+    desc: "Eliminated structure and newly introduced structure can share storage when ownership allows.",
+  },
+  {
+    num: "02",
+    label: "memory model",
+    icon: "fa-solid fa-memory",
+    title: "FBIP Direction",
+    desc: "Functional-But-In-Place: unique references unlock safe in-place mutation and reuse.",
+  },
+  {
+    num: "03",
+    label: "compilation",
+    icon: "fa-solid fa-cubes",
+    title: "Pass-Oriented IR",
+    desc: "Token instantiation, infer-tag, and drop expansion expose optimization opportunities.",
+  },
+  {
+    num: "04",
+    label: "interop",
+    icon: "fa-solid fa-plug-circle-bolt",
+    title: "RC Runtime + FFI",
+    desc: "A polymorphic FFI path connects managed memory logic to native ecosystems.",
+  },
+];
+---
+
+<section class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+  {cards.map((c) => (
+    <article class="group rounded-2xl border border-slate-700 bg-slate-900/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/5">
+      <p class="font-mono text-xs text-cyan-300">
+        {c.num} / {c.label}
+      </p>
+      <h2 class="mt-2 flex items-center gap-2 font-display text-xl text-white">
+        <i class={`${c.icon} text-cyan-300 transition-transform duration-300 group-hover:scale-110`}></i>
+        {c.title}
+      </h2>
+      <p class="mt-2 text-sm text-slate-300">{c.desc}</p>
+    </article>
+  ))}
+</section>

@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* ── Science grid background ── */
+.science-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── Aurora blobs ── */
+.hero-aurora {
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.18), transparent 70%);
+  animation: aurora-drift 12s ease-in-out infinite alternate;
+}
+.hero-aurora-2 {
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15), transparent 70%);
+  animation: aurora-drift-2 15s ease-in-out infinite alternate;
+}
+.hero-aurora-3 {
+  background: radial-gradient(
+    circle,
+    rgba(34, 211, 238, 0.1),
+    rgba(168, 85, 247, 0.08),
+    transparent 70%
+  );
+  animation: aurora-drift-3 18s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.08); }
+}
+@keyframes aurora-drift-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-35px, -25px) scale(1.06); }
+}
+@keyframes aurora-drift-3 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(25px, -20px) scale(1.05); }
+}
+
+/* ── Navbar blur ── */
+.nav-bar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(2, 6, 23, 0.75);
+}
+
+/* ── Animated gradient text ── */
+.animated-gradient-text {
+  background: linear-gradient(90deg, #fff, #22d3ee, #a855f7, #fff);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Badge glow ── */
+.badge-glow {
+  animation: badge-pulse 3s ease-in-out infinite;
+}
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+  50% { box-shadow: 0 0 12px 2px rgba(34, 211, 238, 0.25); }
+}
+
+/* ── Section gradient border ── */
+.section-gradient-border {
+  position: relative;
+}
+.section-gradient-border::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #22d3ee, #a855f7, transparent);
+  border-radius: 1px;
+}
+
+/* ── Progress bars ── */
+progress.progress {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  overflow: hidden;
+  background-color: rgb(30 41 59);
+}
+progress.progress::-webkit-progress-bar {
+  background-color: rgb(30 41 59);
+  border-radius: 9999px;
+}
+progress.progress::-webkit-progress-value {
+  background-color: rgb(34 211 238);
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+}
+progress.progress::-moz-progress-bar {
+  background-color: rgb(34 211 238);
+  border-radius: 9999px;
+}
+
+/* ── 3D Carousel ── */
+.carousel-scene {
+  perspective: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+}
+
+.carousel-rotor {
+  position: relative;
+  width: 320px;
+  height: 340px;
+  transform-style: preserve-3d;
+}
+
+.carousel-cell {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 0.8s ease,
+              filter 0.8s ease;
+}
+
+/* Slots set by JS — these are defaults before JS runs */
+.carousel-cell.slot-front {
+  transform: translateX(0) translateZ(30px) rotateY(0deg) scale(1);
+  opacity: 1;
+  filter: blur(0) brightness(1);
+  z-index: 3;
+  box-shadow: 0 0 30px 4px rgba(34, 211, 238, 0.18);
+}
+
+.carousel-cell.slot-left {
+  transform: translateX(-240px) translateZ(-60px) rotateY(-25deg) scale(0.82);
+  opacity: 0.45;
+  filter: blur(1.5px) brightness(0.6);
+  z-index: 1;
+}
+
+.carousel-cell.slot-right {
+  transform: translateX(240px) translateZ(-60px) rotateY(25deg) scale(0.82);
+  opacity: 0.45;
+  filter: blur(1.5px) brightness(0.6);
+  z-index: 1;
+}
+
+/* ── Dot navigation ── */
+.carousel-dots {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(34, 211, 238, 0.4);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  padding: 0;
+}
+
+.carousel-dot:hover {
+  border-color: rgba(34, 211, 238, 0.7);
+}
+
+.carousel-dot.active {
+  background: rgb(34 211 238);
+  border-color: rgb(34 211 238);
+  box-shadow: 0 0 8px 2px rgba(34, 211, 238, 0.35);
+}
+
+/* ── Entry animation ── */
+@keyframes carousel-entrance {
+  from {
+    opacity: 0;
+    transform: scale(0.6) translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.carousel-scene.in-view {
+  animation: carousel-entrance 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .carousel-rotor {
+    width: 270px;
+    height: 310px;
+  }
+  .carousel-cell.slot-left {
+    transform: translateX(-170px) translateZ(-60px) rotateY(-25deg) scale(0.78);
+  }
+  .carousel-cell.slot-right {
+    transform: translateX(170px) translateZ(-60px) rotateY(25deg) scale(0.78);
+  }
+}

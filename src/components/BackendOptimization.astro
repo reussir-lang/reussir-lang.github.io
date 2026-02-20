@@ -1,0 +1,52 @@
+---
+const columns = [
+  {
+    title: "Ownership Exposure",
+    items: [
+      "- token instantiation makes allocation sites explicit",
+      "- rc.dec expansion lowers uniqueness checks into structured control flow",
+      "- infer-variant-tag unlocks precise drop specialization",
+    ],
+  },
+  {
+    title: "Cancellation + Reuse",
+    items: [
+      "- inc/dec cancellation (twice) removes redundant refcount traffic",
+      "- drop expansion surfaces hidden decrements for fusion",
+      "- token reuse dataflow rewrites fresh alloc to reuse paths",
+    ],
+  },
+  {
+    title: "Lowering Pipeline",
+    items: [
+      "- SCF-level ownership logic is preserved until late",
+      "- SCF -> CF -> LLVM lowering after reuse/cancellation decisions",
+      "- final canonicalization and CSE clean residual overhead",
+    ],
+  },
+];
+---
+
+<section class="section-gradient-border rounded-3xl border border-slate-700 bg-slate-900/70 p-7 md:p-10">
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-2">
+    <h2 class="flex items-center gap-3 font-display text-2xl text-white md:text-3xl">
+      <i class="fa-solid fa-gears text-cyan-300"></i>
+      Backend Optimization, Heavily
+    </h2>
+    <p class="font-mono text-xs text-slate-400">
+      MLIR backend is the center of Reussir's value
+    </p>
+  </div>
+  <div class="grid gap-4 lg:grid-cols-3">
+    {columns.map((col) => (
+      <article class="rounded-2xl border border-slate-700 bg-slate-950 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50">
+        <h3 class="mb-3 font-display text-xl text-white">{col.title}</h3>
+        <ul class="space-y-2 text-sm text-slate-300">
+          {col.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </article>
+    ))}
+  </div>
+</section>

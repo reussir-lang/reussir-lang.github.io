@@ -5,16 +5,25 @@ Technical website for Reussir.
 ## Local development
 
 ```bash
-trunk serve --address 127.0.0.1 --port 8080
+npm install
+npm run dev
+```
+
+## Production build
+
+```bash
+npm run build
+npm run preview   # preview the built site locally
 ```
 
 ## GitHub Pages deployment
 
 This repo uses `.github/workflows/pages.yml` to:
 
-1. build the site with Trunk (`trunk build --release`)
-2. upload `dist/` as Pages artifact
-3. deploy via `actions/deploy-pages`
+1. install dependencies with `npm ci`
+2. build the site with `npm run build` (Astro)
+3. upload `dist/` as Pages artifact
+4. deploy via `actions/deploy-pages`
 
 For organization root site hosting, the repository name must be:
 

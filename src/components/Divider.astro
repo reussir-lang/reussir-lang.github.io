@@ -1,0 +1,14 @@
+---
+interface Props {
+  color?: "cyan" | "purple";
+}
+const { color = "cyan" } = Astro.props;
+const via = color === "cyan" ? "via-cyan-400/30" : "via-purple-400/30";
+const dot = color === "cyan" ? "text-cyan-400/50" : "text-purple-400/50";
+---
+
+<div class="flex items-center gap-4 py-2">
+  <div class={`h-px flex-1 bg-gradient-to-r from-transparent ${via} to-transparent`}></div>
+  <i class={`fa-solid fa-diamond text-[0.5rem] ${dot}`}></i>
+  <div class={`h-px flex-1 bg-gradient-to-r from-transparent ${via} to-transparent`}></div>
+</div>

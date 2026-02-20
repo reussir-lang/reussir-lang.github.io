@@ -1,0 +1,34 @@
+---
+import { REUSSIR_REPO_URL } from "../data/constants";
+---
+
+<footer class="relative border-t border-slate-700/50">
+  <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 md:flex-row md:px-8">
+    <div>
+      <p class="font-display text-lg font-bold text-white">Reussir</p>
+      <p class="text-sm text-slate-400">
+        RC-based memory reuse &middot; Region management &middot; MLIR-powered compilation
+      </p>
+    </div>
+    <div class="flex items-center gap-4">
+      <a
+        class="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors duration-200 hover:text-cyan-300"
+        href={REUSSIR_REPO_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <i class="fa-brands fa-github"></i>
+        GitHub
+      </a>
+      <a
+        class="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors duration-200 hover:text-cyan-300"
+        href="/reussir-design-slides.pdf"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <i class="fa-solid fa-file-pdf"></i>
+        Design Slides
+      </a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,63 @@
+---
+import { REUSSIR_REPO_URL } from "../data/constants";
+---
+
+<section class="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+  <article class="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6 md:p-7">
+    <h2 class="flex items-center gap-3 font-display text-2xl text-white">
+      <i class="fa-solid fa-robot text-cyan-200"></i>
+      AI View (Excerpt)
+    </h2>
+    <p class="mt-1 font-mono text-xs text-cyan-200">
+      from{" "}
+      <a
+        class="underline decoration-cyan-300/70 underline-offset-2 transition-colors duration-200 hover:text-cyan-100"
+        href={REUSSIR_REPO_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        AGENTS.md in public repo
+      </a>
+    </p>
+    <blockquote class="mt-5 rounded-xl border-l-4 border-cyan-300 bg-slate-950/70 p-5 text-sm text-slate-200">
+      Reussir is developed "with AI, and for AI."
+    </blockquote>
+    <ul class="mt-4 space-y-2 text-sm text-slate-200">
+      <li>- clear logic and architecture</li>
+      <li>- continuous testing for newly added features</li>
+      <li>- clear documentation and comments</li>
+      <li>- efficient implementation for complex problems</li>
+    </ul>
+  </article>
+  <article class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 md:p-7">
+    <h2 class="flex items-center gap-3 font-display text-2xl text-white">
+      <i class="fa-solid fa-user-group text-cyan-300"></i>
+      People Involved
+    </h2>
+    <p class="mt-1 font-mono text-xs text-slate-400">
+      human contributors only, based on{" "}
+      <a
+        class="underline decoration-cyan-400/60 underline-offset-2 transition-colors duration-200 hover:text-cyan-300"
+        href={REUSSIR_REPO_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        repository history
+      </a>
+    </p>
+    <div class="mt-4 grid gap-2 text-sm">
+      <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+        Schrodinger ZHU Yifan
+      </div>
+      <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+        QueClr
+      </div>
+      <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+        Archaversine / Adam
+      </div>
+    </div>
+    <p class="mt-4 text-xs text-amber-300">
+      AI accounts removed: copilot-swe-agent[bot], google-labs-jules[bot], Copilot.
+    </p>
+  </article>
+</section>
