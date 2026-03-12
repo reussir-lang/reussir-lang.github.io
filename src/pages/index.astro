@@ -1,40 +1,729 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
-import HeroSection from "../components/HeroSection.astro";
-import FeatureCards from "../components/FeatureCards.astro";
-import Divider from "../components/Divider.astro";
-import CompilationObservatory from "../components/CompilationObservatory.astro";
-import BackendOptimization from "../components/BackendOptimization.astro";
-import CodegenQuality from "../components/CodegenQuality.astro";
-import CodeShowcase3D from "../components/CodeShowcase3D.astro";
-import AiViewAndPeople from "../components/AiViewAndPeople.astro";
 import Footer from "../components/Footer.astro";
+import { REUSSIR_PLAYGROUND_URL, REUSSIR_REPO_URL } from "../data/constants";
 import "../styles/app.css";
+
+const thesisCards = [
+  {
+    eyebrow: "IR-level framing",
+    title: "Reuse is modeled directly in the compiler IR",
+    copy:
+      "Reussir frames memory reuse as a first-class compilation problem. Instead of hiding optimization inside a language-specific calculus, it exposes reusable storage as explicit tokens inside MLIR."
+  },
+  {
+    eyebrow: "Structured control flow",
+    title: "Tokens survive branches, joins, loops, and early returns",
+    copy:
+      "The analysis runs over SCF regions rather than only local match-construct pairs. That gives the pipeline a way to reason about reuse when the operational story spans multiple regions or call boundaries."
+  },
+  {
+    eyebrow: "Backend consequences",
+    title: "Reuse decisions are tied to lowering quality, not just allocation counts",
+    copy:
+      "The implementation combines token reuse with RC creation sinking, RC-materialization fusion, simplified TRMc, and invariant-group propagation so the generated LLVM stays competitive."
+  }
+];
+
+const diagramNodes = [
+  {
+    id: "payload",
+    label: "payload T",
+    kicker: "Value",
+    title: "Payload values remain explicit",
+    body:
+      "The object model keeps the data payload separate from the owning handle. Reuse is not magical mutation; it is an explicit reassembly of payload plus storage."
+  },
+  {
+    id: "token",
+    label: "token<A,S>",
+    kicker: "Storage",
+    title: "Tokens represent reusable storage",
+    body:
+      "A token is a raw memory block with fixed size and alignment. It is the key bridge between destruction and reconstruction, and it can be allocated only when reuse fails."
+  },
+  {
+    id: "rc",
+    label: "rc<T>",
+    kicker: "Owner",
+    title: "RC pointers carry ownership",
+    body:
+      "Owning references are reference counted. The compiler inserts increments when values must stay live and decrements when ownership can be released to potentially recover storage."
+  },
+  {
+    id: "nullable",
+    label: "nullable<token>",
+    kicker: "Maybe reuse",
+    title: "Decrement produces a nullable token",
+    body:
+      "When `rc.dec` observes uniqueness, it exposes the underlying storage as a token. Otherwise the result is null, so later code can fall back to allocation without changing semantics."
+  },
+  {
+    id: "ref",
+    label: "ref<T>",
+    kicker: "Borrow",
+    title: "Borrowed references inspect or destroy payloads",
+    body:
+      "The non-owning reference lets later passes inspect fields, drop payload contents, or project sub-objects while keeping ownership changes explicit."
+  }
+];
+
+const pipelineNodeWidth = 108;
+const pipelineNodeHeight = 50;
+const pipelineNodes = [
+  { id: "ucrec", x: 90, y: 78, kind: "opt", label: ["UniqueCarry", "Rec"] },
+  { id: "inliner", x: 214, y: 78, kind: "mlir", label: ["Inliner"] },
+  { id: "tokeninst", x: 338, y: 78, kind: "reuse", label: ["Token", "Inst."] },
+  { id: "closure", x: 462, y: 78, kind: "mlir", label: ["Closure", "Outline"] },
+  { id: "regionpat", x: 586, y: 78, kind: "mlir", label: ["Region", "Patterns"] },
+  { id: "cancel1", x: 586, y: 156, kind: "reuse", label: ["Inc/Dec", "Cancel"] },
+  { id: "rcdec", x: 462, y: 156, kind: "reuse", label: ["RcDec", "Expand"] },
+  { id: "tag", x: 338, y: 156, kind: "reuse", label: ["Infer", "Tag"] },
+  { id: "acq1", x: 214, y: 156, kind: "reuse", label: ["Acquire", "Drop"] },
+  { id: "scf1", x: 90, y: 156, kind: "mlir", label: ["SCF", "Conversion"] },
+  { id: "cancel2", x: 90, y: 234, kind: "reuse", label: ["Inc/Dec", "Cancel"] },
+  { id: "acq2", x: 214, y: 234, kind: "reuse", label: ["AcquireDrop", "(Outline)"] },
+  { id: "reuse", x: 338, y: 234, kind: "reuse", label: ["Oneshot", "Reuse"] },
+  { id: "scf2", x: 462, y: 234, kind: "mlir", label: ["SCF", "Conversion"] },
+  { id: "sink", x: 586, y: 234, kind: "opt", label: ["RcCreate", "Sink"] },
+  { id: "fusion", x: 586, y: 312, kind: "opt", label: ["RcCreate", "Fusion"] },
+  { id: "trmc", x: 462, y: 312, kind: "opt", label: ["Simple", "TRMc"] },
+  { id: "polyffi", x: 338, y: 312, kind: "mlir", label: ["Compile", "PolyFFI"] },
+  { id: "inv", x: 214, y: 312, kind: "opt", label: ["Invariant", "Group"] },
+  { id: "canon1", x: 90, y: 312, kind: "mlir", label: ["Canon."] },
+  { id: "cfsink", x: 90, y: 390, kind: "mlir", label: ["CF", "Sink"] },
+  { id: "scftocf", x: 214, y: 390, kind: "mlir", label: ["SCF→CF"] },
+  { id: "basic", x: 338, y: 390, kind: "mlir", label: ["Basic", "Lower"] },
+  { id: "cftollvm", x: 462, y: 390, kind: "mlir", label: ["CF→LLVM"] },
+  { id: "casts", x: 586, y: 390, kind: "mlir", label: ["Reconcile", "Casts"] },
+  { id: "cse", x: 586, y: 468, kind: "mlir", label: ["CSE"] },
+  { id: "mcanon", x: 462, y: 468, kind: "mlir", label: ["Canon."] },
+  { id: "l1", x: 770, y: 325, kind: "llvm", label: ["Runtime", "Attr."] },
+  { id: "l2", x: 770, y: 403, kind: "llvm", label: ["LLVM Default", "Pipeline"] },
+  { id: "l3", x: 770, y: 481, kind: "llvm", label: ["Alloc", "Simpl."] }
+];
+
+const pipelineNodeMap = Object.fromEntries(pipelineNodes.map((node) => [node.id, node]));
+const rightEdge = (id) => pipelineNodeMap[id].x + pipelineNodeWidth / 2;
+const leftEdge = (id) => pipelineNodeMap[id].x - pipelineNodeWidth / 2;
+const topEdge = (id) => pipelineNodeMap[id].y - pipelineNodeHeight / 2;
+const bottomEdge = (id) => pipelineNodeMap[id].y + pipelineNodeHeight / 2;
+const sameRowPath = (fromId, toId) =>
+  `M ${rightEdge(fromId)} ${pipelineNodeMap[fromId].y} L ${leftEdge(toId)} ${pipelineNodeMap[toId].y}`;
+const sameRowReversePath = (fromId, toId) =>
+  `M ${leftEdge(fromId)} ${pipelineNodeMap[fromId].y} L ${rightEdge(toId)} ${pipelineNodeMap[toId].y}`;
+const sameColumnPath = (fromId, toId) =>
+  `M ${pipelineNodeMap[fromId].x} ${bottomEdge(fromId)} L ${pipelineNodeMap[toId].x} ${topEdge(toId)}`;
+
+const pipelineFlows = [
+  sameRowPath("ucrec", "inliner"),
+  sameRowPath("inliner", "tokeninst"),
+  sameRowPath("tokeninst", "closure"),
+  sameRowPath("closure", "regionpat"),
+  sameColumnPath("regionpat", "cancel1"),
+  sameRowReversePath("cancel1", "rcdec"),
+  sameRowReversePath("rcdec", "tag"),
+  sameRowReversePath("tag", "acq1"),
+  sameRowReversePath("acq1", "scf1"),
+  sameColumnPath("scf1", "cancel2"),
+  sameRowPath("cancel2", "acq2"),
+  sameRowPath("acq2", "reuse"),
+  sameRowPath("reuse", "scf2"),
+  sameRowPath("scf2", "sink"),
+  sameColumnPath("sink", "fusion"),
+  sameRowReversePath("fusion", "trmc"),
+  sameRowReversePath("trmc", "polyffi"),
+  sameRowReversePath("polyffi", "inv"),
+  sameRowReversePath("inv", "canon1"),
+  sameColumnPath("canon1", "cfsink"),
+  sameRowPath("cfsink", "scftocf"),
+  sameRowPath("scftocf", "basic"),
+  sameRowPath("basic", "cftollvm"),
+  sameRowPath("cftollvm", "casts"),
+  sameColumnPath("casts", "cse"),
+  sameRowReversePath("cse", "mcanon"),
+  `M ${pipelineNodeMap.mcanon.x} ${bottomEdge("mcanon")} L ${pipelineNodeMap.mcanon.x} 525 L 706 525 L 706 ${pipelineNodeMap.l1.y} L ${leftEdge("l1")} ${pipelineNodeMap.l1.y}`,
+  sameColumnPath("l1", "l2"),
+  sameColumnPath("l2", "l3")
+];
+
+const pipelineLegend = [
+  { label: "Reuse", kind: "reuse" },
+  { label: "Extra opts", kind: "opt" },
+  { label: "MLIR lowering", kind: "mlir" },
+  { label: "LLVM", kind: "llvm" }
+];
+
+const specialOptimizations = [
+  {
+    id: "unique",
+    nav: "UniqueCarry",
+    kicker: "Special optimization",
+    title: "Uniqueness Carrying Recursion",
+    summary:
+      "This pass targets self-recursive code where an RC value remains unique across iterations, so the compiler can preserve that uniqueness fact instead of re-establishing it in every loop body.",
+    mechanics:
+      "The analysis tracks provenance from function arguments, fresh RC creation, and SCF joins. When all RC results of a self-recursive path are carrying, Reussir outlines a `.unique` clone and inserts `reussir.rc.assume_unique` at the clone entry.",
+    effect:
+      "For contiguous aggregates such as arrays, that can pull repeated uniqueness checks out of the hot recursive path and expose a cleaner loop body to later optimizations like vectorization."
+  },
+  {
+    id: "fusion",
+    nav: "RC Sink/Fuse",
+    kicker: "Special optimization",
+    title: "RC Sinking and Fusion",
+    summary:
+      "After reuse rewriting, the IR often contains paired `scf.if` diamonds: one from `rc.dec`, one from `token.ensure`. Reussir adds local rewrites to recover a more direct connection between reuse and RC creation.",
+    mechanics:
+      "RcCreationSinking moves `reussir.rc.create` into the reuse and fresh-allocation branches. TokenEnsureConditionFusion replaces nullable-token checks with the original uniqueness test when the token came directly from `rc.dec`, and RcCreationFusion folds record materialization into fused RC creation ops such as `reussir.rc.create_compound`.",
+    effect:
+      "The fused operations can record inherited field positions in `skipFields`, which lets lowering omit redundant stores when the reused object already contains the required bytes."
+  },
+  {
+    id: "invariant",
+    nav: "InvariantGroup",
+    kicker: "Special optimization",
+    title: "Invariant Group Analysis",
+    summary:
+      "Functional RC code has a strong semantic property: once an object is shared, its observable fields are referentially transparent for the rest of that object’s lifetime. Reussir exposes that fact to LLVM with `!invariant.group`.",
+    mechanics:
+      "A sparse forward dataflow analysis seeds references from `reussir.rc.borrow`, propagates through `reussir.ref.project`, and marks `reussir.ref.load` only when its input reference is proven safe. Reuse paths explicitly launder the invariant group when a token becomes storage for a new object.",
+    effect:
+      "This is especially effective for closures: after devirtualization, LLVM can fold captured environment loads more aggressively because the immutability fact is attached to the root pointer."
+  },
+  {
+    id: "trmc",
+    nav: "Simple TRMc",
+    kicker: "Special optimization",
+    title: "Simple TRMc Analysis",
+    summary:
+      "After RC creation fusion, outer constructor allocation is already explicit in the IR, which makes tail recursion modulo cons easier to recognize than in unfused functional IR.",
+    mechanics:
+      "The pass introduces `!reussir.hole<T>` as a write-once destination for still-unfilled fields. When direct self-calls flow into those fields, the compiler outlines a `.trmc` helper that writes through the hole instead of returning the recursive result.",
+    effect:
+      "This keeps the recursive path close to a single backedge and allows the transformation to operate after ownership and storage choices have already been resolved by the reuse pipeline."
+  }
+];
+
+const memoryNotes = [
+  "Current Reussir runs from 517 MB to 777 MB across the measured workloads.",
+  "The largest memory gap comes from fixed-size variant padding and the lack of pointer tagging for fieldless variants.",
+  "On tree workloads, directly ported Rust code stays near 9 GB because persistence keeps intermediate structures alive."
+];
 ---
 
-<Layout title="Reussir | coming soon">
-  <div class="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-    <div class="science-grid absolute inset-0 opacity-50"></div>
-    <div class="hero-aurora absolute left-[-8rem] top-[-8rem] h-[28rem] w-[28rem] rounded-full blur-3xl"></div>
-    <div class="hero-aurora-2 absolute bottom-[-10rem] right-[-10rem] h-[30rem] w-[30rem] rounded-full blur-3xl"></div>
-    <div class="hero-aurora-3 absolute left-[40%] top-[45%] h-[24rem] w-[24rem] rounded-full blur-3xl"></div>
+<Layout title="Reussir | Token-Based Reuse on MLIR">
+  <div id="top" class="page-shell">
+    <div class="page-noise"></div>
+    <div class="page-orb page-orb-a"></div>
+    <div class="page-orb page-orb-b"></div>
+    <div class="page-orb page-orb-c"></div>
 
     <Navbar />
 
-    <main class="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-5 pb-20 pt-8 md:px-8 md:pt-12">
-      <HeroSection />
-      <FeatureCards />
-      <Divider />
-      <CompilationObservatory />
-      <BackendOptimization />
-      <CodegenQuality />
-      <Divider color="purple" />
-      <CodeShowcase3D />
-      <Divider />
-      <AiViewAndPeople />
+    <main class="page-main">
+      <section class="hero-grid">
+        <div class="hero-copy" data-reveal>
+          <div class="eyebrow-pill">Early Development</div>
+          <p class="hero-kicker">General token-based reuse analysis for RC functional languages</p>
+          <h1 class="hero-title">
+            Reussir turns memory reuse into a visible compiler system instead of a hidden runtime trick.
+          </h1>
+          <p class="hero-body">
+            The project positions reuse at the IR level: explicit tokens, structured control flow, and backend-aware lowering passes inside MLIR. The result is a compiler story that is easier to inspect, easier to extend, and already competitive with Lean 4 while approaching Koka on several workloads.
+          </p>
+          <div class="hero-actions">
+            <a class="cta-primary" href="#diagram">See the object model</a>
+            <a class="cta-secondary" href="#evidence">Read the evidence</a>
+            <a class="cta-secondary" href={REUSSIR_PLAYGROUND_URL} target="_blank" rel="noreferrer">
+              Open playground
+            </a>
+            <a class="cta-link" href={REUSSIR_REPO_URL} target="_blank" rel="noreferrer">
+              Repository
+            </a>
+          </div>
+          <div class="hero-proof-grid">
+            <article class="proof-chip">
+              <span class="proof-label">rbtree</span>
+              <strong>2.8x faster than Lean 4</strong>
+            </article>
+            <article class="proof-chip">
+              <span class="proof-label">rbtree-zipper</span>
+              <strong>Within 16% of Koka</strong>
+            </article>
+            <article class="proof-chip">
+              <span class="proof-label">derive</span>
+              <strong>Matches Lean 4 exactly</strong>
+            </article>
+          </div>
+        </div>
+
+        <div class="hero-visual surface-card" data-reveal data-glow>
+          <div class="surface-label">Live system view</div>
+          <div class="hero-stage">
+            <div class="hero-node hero-node-match">
+              <span class="hero-node-label">eliminate</span>
+              <strong>Pattern match</strong>
+            </div>
+            <div class="hero-node hero-node-token">
+              <span class="hero-node-label">reuse resource</span>
+              <strong>token&lt;A,S&gt;</strong>
+            </div>
+            <div class="hero-node hero-node-build">
+              <span class="hero-node-label">introduce</span>
+              <strong>Constructor rebuild</strong>
+            </div>
+            <div class="hero-pulse hero-pulse-a"></div>
+            <div class="hero-pulse hero-pulse-b"></div>
+            <svg class="hero-lines" viewBox="0 0 400 280" aria-hidden="true">
+              <path d="M104 92C138 92 158 122 190 140" />
+              <path d="M212 140C250 156 284 194 314 194" />
+              <path d="M86 214C134 244 284 244 332 224" />
+            </svg>
+          </div>
+          <div class="hero-metric-grid">
+            <article>
+              <span class="metric-kicker">Core claim</span>
+              <strong>Reuse expressed in MLIR, not hidden in one frontend.</strong>
+            </article>
+            <article>
+              <span class="metric-kicker">Analysis scope</span>
+              <strong>SCF branches, loops, joins, and recursive call flow.</strong>
+            </article>
+            <article>
+              <span class="metric-kicker">Backend focus</span>
+              <strong>Lowering quality matters as much as allocation count.</strong>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="thesis" class="section-stack">
+        <div class="section-heading" data-reveal>
+          <p class="section-kicker">Thesis</p>
+          <h2>What makes the project meaningful</h2>
+          <p>
+            Reussir is most compelling when it states the compiler argument directly: functional programs repeatedly destroy and rebuild values, and those introduction-elimination pairs are natural reuse sites.
+          </p>
+        </div>
+
+        <div class="thesis-grid">
+          {thesisCards.map((card) => (
+            <article class="surface-card thesis-card" data-reveal data-glow>
+              <p class="card-eyebrow">{card.eyebrow}</p>
+              <h3>{card.title}</h3>
+              <p>{card.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="diagram" class="section-stack diagram-section">
+        <div class="section-heading" data-reveal>
+          <p class="section-kicker">Object Model</p>
+          <h2>An interactive map of the RC reuse machinery</h2>
+          <p>
+            Click the nodes to inspect how ownership, borrowing, and reusable storage connect across the RC object model.
+          </p>
+        </div>
+
+        <div class="diagram-grid">
+          <div class="surface-card diagram-canvas-card" data-reveal data-glow>
+            <div class="surface-label">Compiler object model</div>
+            <div class="diagram-canvas">
+              <svg class="diagram-lines" viewBox="0 0 640 360" aria-hidden="true">
+                <path d="M164 88L298 150" />
+                <path d="M472 88L338 150" />
+                <path d="M320 170L320 208" />
+                <path d="M288 208L190 278" />
+                <path d="M352 208L452 278" />
+                <path d="M220 278C292 236 336 110 442 88" />
+              </svg>
+
+              {diagramNodes.map((node) => (
+                <button
+                  class={`diagram-node diagram-node-${node.id}`}
+                  type="button"
+                  data-diagram-node
+                  data-kicker={node.kicker}
+                  data-title={node.title}
+                  data-body={node.body}
+                >
+                  <span>{node.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <aside class="surface-card diagram-detail" data-reveal>
+            <div class="surface-label">Selected node</div>
+            <p id="diagram-kicker" class="detail-kicker"></p>
+            <h3 id="diagram-title"></h3>
+            <p id="diagram-body"></p>
+            <div class="detail-facts">
+              <article>
+                <span>Borrow</span>
+                <p>`rc.borrow` exposes a payload view without changing the reference count.</p>
+              </article>
+              <article>
+                <span>Release</span>
+                <p>`rc.dec` either returns reusable storage or null, which keeps the fallback path explicit.</p>
+              </article>
+              <article>
+                <span>Create</span>
+                <p>`rc.create` consumes a payload together with a token, turning reuse back into an owning object.</p>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section-stack">
+        <div class="section-heading" data-reveal>
+          <p class="section-kicker">Pipeline</p>
+          <h2>The full backend pass graph</h2>
+          <p>
+            This shows the full backend pipeline rather than compressing it into a few narrative steps. It includes reuse-relevant passes, extra backend optimizations, generic MLIR lowering, and the LLVM cleanup stages.
+          </p>
+        </div>
+
+        <div class="surface-card pipeline-figure-card" data-reveal data-glow>
+          <div class="surface-label">Backend optimization pipeline</div>
+          <p class="pipeline-caption">
+            The current backend is intentionally broader than reuse analysis alone. Feature-support passes such as `Closure Outline`, `Region Patterns`, and `Compile PolyFFI` sit alongside reuse analysis and the later MLIR-to-LLVM lowering path.
+          </p>
+          <div class="pipeline-svg-wrap">
+            <svg class="pipeline-svg" viewBox="0 0 860 570" role="img" aria-label="Backend optimization pipeline for Reussir">
+              <defs>
+                <marker id="pipeline-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                  <path d="M 0 0 L 8 4 L 0 8 z"></path>
+                </marker>
+              </defs>
+
+              <rect class="pipeline-group pipeline-group-mlir" x="34" y="38" width="610" height="468" rx="18"></rect>
+              <text class="pipeline-group-label" x="58" y="66">MLIR</text>
+              <rect class="pipeline-group pipeline-group-llvm" x="688" y="282" width="134" height="238" rx="18"></rect>
+              <text class="pipeline-group-label" x="712" y="310">LLVM</text>
+
+              {pipelineFlows.map((flow) => (
+                <path class="pipeline-flow" d={flow} marker-end="url(#pipeline-arrow)"></path>
+              ))}
+
+              {pipelineNodes.map((node) => (
+                <g class={`pipeline-pass pipeline-pass-${node.kind}`}>
+                  <rect
+                    x={node.x - pipelineNodeWidth / 2}
+                    y={node.y - pipelineNodeHeight / 2}
+                    width={pipelineNodeWidth}
+                    height={pipelineNodeHeight}
+                    rx="12"
+                  ></rect>
+                  <text x={node.x} y={node.y - (node.label.length - 1) * 8}>
+                    {node.label.map((line, index) => (
+                      <tspan x={node.x} dy={index === 0 ? 0 : 16}>{line}</tspan>
+                    ))}
+                  </text>
+                </g>
+              ))}
+
+              {pipelineLegend.map((item, index) => (
+                <g transform={`translate(${64 + index * 182} 538)`}>
+                  <rect class={`pipeline-legend-chip pipeline-legend-chip-${item.kind}`} width="28" height="16" rx="8"></rect>
+                  <text class="pipeline-legend-label" x="40" y="12">{item.label}</text>
+                </g>
+              ))}
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-stack">
+        <div class="section-heading" data-reveal>
+          <p class="section-kicker">Special Optimizations</p>
+          <h2>Detailed expansions focus on the distinctive optimization work</h2>
+          <p>
+            Instead of inventing a stage-by-stage explainer, this section focuses on the distinctive optimizations: uniqueness-carrying recursion, RC sinking and fusion, invariant-group analysis, and simple TRMc.
+          </p>
+        </div>
+
+        <div class="optimization-grid">
+          <div class="surface-card optimization-nav" data-reveal data-glow>
+            <div class="surface-label">Optimizations</div>
+            <div class="optimization-buttons">
+              {specialOptimizations.map((optimization) => (
+                <button
+                  class="optimization-button"
+                  type="button"
+                  data-optimization-button
+                  data-kicker={optimization.kicker}
+                  data-title={optimization.title}
+                  data-summary={optimization.summary}
+                  data-mechanics={optimization.mechanics}
+                  data-effect={optimization.effect}
+                >
+                  <strong>{optimization.nav}</strong>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="surface-card optimization-detail" data-reveal>
+            <div class="surface-label">Selected optimization</div>
+            <p id="optimization-kicker" class="detail-kicker"></p>
+            <h3 id="optimization-title"></h3>
+            <p id="optimization-summary"></p>
+            <div class="optimization-facts">
+              <article>
+                <span>Mechanics</span>
+                <p id="optimization-mechanics"></p>
+              </article>
+              <article>
+                <span>Compiler effect</span>
+                <p id="optimization-effect"></p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-stack">
+        <div class="section-heading" data-reveal>
+          <p class="section-kicker">Interactive Story</p>
+          <h2>Why reuse across call boundaries matters</h2>
+          <p>
+            The red-black tree result is the clearest demonstration. Toggle the scene to see the difference between local-only reuse and a token that can travel back to the caller.
+          </p>
+        </div>
+
+        <div class="surface-card reuse-lab" data-reveal data-glow>
+          <div class="surface-label">Cross-call reuse lab</div>
+          <div class="lab-controls">
+            <button class="lab-toggle active" type="button" data-lab-mode="local">Local only</button>
+            <button class="lab-toggle" type="button" data-lab-mode="cross">Across calls</button>
+          </div>
+
+          <div id="reuse-scene" class="lab-scene" data-mode="local">
+            <div class="lab-frame lab-frame-callee">
+              <span class="lab-frame-kicker">callee frame</span>
+              <strong>`rc.dec` releases a branch</strong>
+              <p>Uniqueness creates a token, but it is stranded unless the pipeline threads it back out.</p>
+            </div>
+            <div class="lab-frame lab-frame-caller">
+              <span class="lab-frame-kicker">caller frame</span>
+              <strong>Constructor wants storage</strong>
+              <p>The rebuild site is outside the recursive frame, so purely local reasoning misses the connection.</p>
+            </div>
+            <div class="lab-route lab-route-fail"></div>
+            <div class="lab-route lab-route-pass"></div>
+            <div class="lab-token-dot"></div>
+          </div>
+
+          <div class="lab-readout">
+            <article>
+              <span class="metric-kicker">Observed outcome</span>
+              <strong id="lab-outcome">rbtree without cross-call flow: 2.59s</strong>
+            </article>
+            <article>
+              <span class="metric-kicker">Interpretation</span>
+              <p id="lab-copy">
+                The token dies inside the recursive frame, so the caller reconstructs with a fresh allocation path.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="evidence" class="section-stack">
+        <div class="section-heading" data-reveal>
+          <p class="section-kicker">Evidence</p>
+          <h2>Benchmark results pulled into the page</h2>
+          <p>
+            The timing plot is included directly on the page, and the companion content summarizes the main performance takeaways instead of splitting the workloads into separate cards.
+          </p>
+        </div>
+
+        <div class="evidence-grid">
+          <figure class="surface-card evidence-figure" data-reveal data-glow>
+            <div class="surface-label">Paper figure</div>
+            <img src="/reussir-results.png" alt="Execution time plot comparing Reussir, Koka, Lean 4, GHC, and Rust variants across five benchmarks." />
+            <figcaption>
+              Lower is better. Reussir is already in Lean 4’s performance range and gets notably closer to Koka on tree-heavy workloads.
+            </figcaption>
+          </figure>
+
+          <aside class="surface-card evidence-summary" data-reveal>
+            <div class="surface-label">Optimization findings</div>
+            <article>
+              <span>Tree workloads</span>
+              <p>
+                The strongest payoff is on trees: `rbtree` completes about 2.8x faster than Lean 4, while `rbtree-zipper` lands within 16% of Koka and still beats both Lean 4 and GHC.
+              </p>
+            </article>
+            <article>
+              <span>NBE and derive</span>
+              <p>
+                `derive` matches Lean 4 exactly, and the `nrac` mode surpasses Lean 4 by 17-23% on the NBE workloads, which suggests that cross-call token flow can sometimes be counterproductive on heterogeneous closure traffic.
+              </p>
+            </article>
+            <article>
+              <span>What is already working</span>
+              <p>
+                The evaluation explicitly says token-based reuse is active on the intended workloads, that direct ownership handover is being realized by the backend, and that simple TRMc already recognizes relevant multi-branch recursive constructor patterns.
+              </p>
+            </article>
+            <article>
+              <span>Why Koka still leads</span>
+              <p>
+                The remaining gap is traced to concrete omissions rather than a broken framework: partial TRMc, no pointer tagging for nullary variants, and fixed-size variant layouts that increase memory traffic and footprint.
+              </p>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section-stack closing-grid">
+        <div class="surface-card closing-card" data-reveal data-glow>
+          <div class="surface-label">Current limitations</div>
+          <h2>Koka still leads for understandable reasons</h2>
+          <p>
+            The remaining gaps are concrete: full TRMc, pointer tagging for nullary variants, and more compact variant layouts. That makes the gap actionable rather than vague.
+          </p>
+          <div class="memory-list">
+            {memoryNotes.map((note) => (
+              <p>{note}</p>
+            ))}
+          </div>
+        </div>
+
+        <div class="surface-card closing-card accent-card" data-reveal>
+          <div class="surface-label">Takeaway</div>
+          <h2>The site now says what the project actually does</h2>
+          <p>
+            Reussir is not just “an RC language.” It is a compiler framework that makes reusable storage explicit, threads it through structured control flow, and studies the downstream codegen effects with real measurements.
+          </p>
+          <div class="closing-actions">
+            <a class="cta-secondary" href={REUSSIR_PLAYGROUND_URL} target="_blank" rel="noreferrer">
+              Launch playground
+            </a>
+            <a class="cta-primary" href={REUSSIR_REPO_URL} target="_blank" rel="noreferrer">
+              Visit GitHub
+            </a>
+            <a class="cta-secondary" href="/reussir-design-slides.pdf" target="_blank" rel="noreferrer">
+              Open slides
+            </a>
+          </div>
+        </div>
+      </section>
     </main>
 
     <Footer />
   </div>
+
+  <script is:inline>
+    const ready = () => {
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+
+      document.querySelectorAll("[data-reveal]").forEach((element) => {
+        revealObserver.observe(element);
+      });
+
+      document.querySelectorAll("[data-glow]").forEach((card) => {
+        card.addEventListener("pointermove", (event) => {
+          const bounds = card.getBoundingClientRect();
+          card.style.setProperty("--mx", `${event.clientX - bounds.left}px`);
+          card.style.setProperty("--my", `${event.clientY - bounds.top}px`);
+        });
+      });
+
+      const diagramButtons = Array.from(document.querySelectorAll("[data-diagram-node]"));
+      const diagramKicker = document.getElementById("diagram-kicker");
+      const diagramTitle = document.getElementById("diagram-title");
+      const diagramBody = document.getElementById("diagram-body");
+
+      const setDiagram = (button) => {
+        diagramButtons.forEach((candidate) => {
+          candidate.classList.toggle("active", candidate === button);
+        });
+        diagramKicker.textContent = button.dataset.kicker || "";
+        diagramTitle.textContent = button.dataset.title || "";
+        diagramBody.textContent = button.dataset.body || "";
+      };
+
+      diagramButtons.forEach((button) => {
+        button.addEventListener("click", () => setDiagram(button));
+      });
+      if (diagramButtons[0]) {
+        setDiagram(diagramButtons[2] || diagramButtons[0]);
+      }
+
+      const optimizationButtons = Array.from(document.querySelectorAll("[data-optimization-button]"));
+      const optimizationKicker = document.getElementById("optimization-kicker");
+      const optimizationTitle = document.getElementById("optimization-title");
+      const optimizationSummary = document.getElementById("optimization-summary");
+      const optimizationMechanics = document.getElementById("optimization-mechanics");
+      const optimizationEffect = document.getElementById("optimization-effect");
+
+      const setOptimization = (button) => {
+        optimizationButtons.forEach((candidate) => {
+          candidate.classList.toggle("active", candidate === button);
+        });
+        optimizationKicker.textContent = button.dataset.kicker || "";
+        optimizationTitle.textContent = button.dataset.title || "";
+        optimizationSummary.textContent = button.dataset.summary || "";
+        optimizationMechanics.textContent = button.dataset.mechanics || "";
+        optimizationEffect.textContent = button.dataset.effect || "";
+      };
+
+      optimizationButtons.forEach((button) => {
+        button.addEventListener("click", () => setOptimization(button));
+      });
+      if (optimizationButtons[0]) {
+        setOptimization(optimizationButtons[0]);
+      }
+
+      const labScene = document.getElementById("reuse-scene");
+      const labOutcome = document.getElementById("lab-outcome");
+      const labCopy = document.getElementById("lab-copy");
+      const labButtons = Array.from(document.querySelectorAll("[data-lab-mode]"));
+
+      const setLabMode = (mode) => {
+        labScene?.setAttribute("data-mode", mode);
+        labButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.labMode === mode);
+        });
+
+        if (mode === "cross") {
+          labOutcome.textContent = "rbtree with cross-call flow: 1.23s";
+          labCopy.textContent =
+            "The token survives the recursive return path and reaches the constructor, which is why this benchmark shows the clearest payoff.";
+          return;
+        }
+
+        labOutcome.textContent = "rbtree without cross-call flow: 2.59s";
+        labCopy.textContent =
+          "The token dies inside the recursive frame, so the caller reconstructs with a fresh allocation path.";
+      };
+
+      labButtons.forEach((button) => {
+        button.addEventListener("click", () => setLabMode(button.dataset.labMode || "local"));
+      });
+      setLabMode("local");
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", ready, { once: true });
+    } else {
+      ready();
+    }
+  </script>
 </Layout>

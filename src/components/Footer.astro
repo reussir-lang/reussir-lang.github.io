@@ -1,5 +1,5 @@
 ---
-import { REUSSIR_REPO_URL } from "../data/constants";
+import { REUSSIR_PLAYGROUND_URL, REUSSIR_REPO_URL } from "../data/constants";
 ---
 
 <footer class="relative border-t border-slate-700/50">
@@ -7,10 +7,19 @@ import { REUSSIR_REPO_URL } from "../data/constants";
     <div>
       <p class="font-display text-lg font-bold text-white">Reussir</p>
       <p class="text-sm text-slate-400">
-        RC-based memory reuse &middot; Region management &middot; MLIR-powered compilation
+        Token-based memory reuse &middot; Structured control flow &middot; MLIR-backed compilation
       </p>
     </div>
     <div class="flex items-center gap-4">
+      <a
+        class="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors duration-200 hover:text-cyan-300"
+        href={REUSSIR_PLAYGROUND_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <i class="fa-solid fa-flask"></i>
+        Playground
+      </a>
       <a
         class="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors duration-200 hover:text-cyan-300"
         href={REUSSIR_REPO_URL}
