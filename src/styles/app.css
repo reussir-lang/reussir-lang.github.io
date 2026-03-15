@@ -223,11 +223,11 @@ img {
 
 .hero-title {
   margin: 0;
-  max-width: 12ch;
+  max-width: 28ch;
   font-family: var(--font-display);
-  font-size: clamp(3.5rem, 8vw, 6.2rem);
-  line-height: 0.92;
-  letter-spacing: -0.05em;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   background: linear-gradient(135deg, #ffffff 0%, #bdfce6 45%, #ffd59a 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1035,7 +1035,7 @@ figcaption {
   }
 
   .hero-title {
-    font-size: clamp(2.9rem, 17vw, 4.3rem);
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
   }
 
   .hero-visual,
