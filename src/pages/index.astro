@@ -226,7 +226,6 @@ const memoryNotes = [
       <section class="hero-grid">
         <div class="hero-copy" data-reveal>
           <div class="eyebrow-pill">Early Development</div>
-          <p class="hero-kicker">General token-based reuse analysis for RC functional languages</p>
           <h1 class="hero-title">
             Reussir turns memory reuse into a visible compiler system instead of a hidden runtime trick.
           </h1>
@@ -234,13 +233,11 @@ const memoryNotes = [
             The project positions reuse at the IR level: explicit tokens, structured control flow, and backend-aware lowering passes inside MLIR. The result is a compiler story that is easier to inspect, easier to extend, and already competitive with Lean 4 while approaching Koka on several workloads.
           </p>
           <div class="hero-actions">
-            <a class="cta-primary" href="#diagram">See the object model</a>
-            <a class="cta-secondary" href="#evidence">Read the evidence</a>
-            <a class="cta-secondary" href={REUSSIR_PLAYGROUND_URL} target="_blank" rel="noreferrer">
+            <a class="cta-primary" href={REUSSIR_PLAYGROUND_URL} target="_blank" rel="noreferrer">
               Open playground
             </a>
-            <a class="cta-link" href={REUSSIR_REPO_URL} target="_blank" rel="noreferrer">
-              Repository
+            <a class="cta-secondary" href={REUSSIR_REPO_URL} target="_blank" rel="noreferrer">
+              View on GitHub
             </a>
           </div>
           <div class="hero-proof-grid">
@@ -598,9 +595,9 @@ const memoryNotes = [
 
         <div class="surface-card closing-card accent-card" data-reveal>
           <div class="surface-label">Takeaway</div>
-          <h2>The site now says what the project actually does</h2>
+          <h2>A compiler framework, not just another RC language</h2>
           <p>
-            Reussir is not just “an RC language.” It is a compiler framework that makes reusable storage explicit, threads it through structured control flow, and studies the downstream codegen effects with real measurements.
+            Reussir makes reusable storage explicit, threads it through structured control flow, and measures the downstream codegen effects with real benchmarks.
           </p>
           <div class="closing-actions">
             <a class="cta-secondary" href={REUSSIR_PLAYGROUND_URL} target="_blank" rel="noreferrer">

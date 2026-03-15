@@ -236,7 +236,6 @@ img {
 
 .hero-body,
 .section-heading p,
-.thesis-card p,
 .diagram-detail p,
 .pipeline-detail p,
 .lab-readout p,
@@ -245,6 +244,13 @@ img {
 figcaption {
   margin: 0;
   color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.thesis-card p {
+  margin: 0;
+  color: #c0d0e0;
   font-size: 1rem;
   line-height: 1.8;
 }
@@ -532,7 +538,7 @@ figcaption {
 
 .diagram-canvas {
   position: relative;
-  min-height: 24rem;
+  min-height: 18rem;
   margin-top: 1rem;
 }
 
